@@ -8,15 +8,6 @@ class Board
       Array.new(9) { Tile.new(CELL) }
     end
   end
-  # def rows
-  #   rtn_arr = []
-  #   @grid.each_with_index do |row, i|
-  #     row.each do |x|
-  #       rtn_arr[i] << x.value
-  #     end
-  #   end
-  #   rtn_arr
-  # end
 
   def initialize(grid=Board.empty_grid)
     @grid = grid
@@ -54,15 +45,6 @@ class Board
     x, y = pos
     @grid[x][y].value = val
   end
-
-  def test
-    @grid[0][2].value = 2
-    @grid[4][4].value = 4
-  end
-end
-
 a = Board.new
 a.render
 # a.bomb_grid
-a.test
-a.render
