@@ -1,11 +1,17 @@
 class Tile
 
-  def initialize(val)
-    @val = val
-    @bomb = val == "X" ? true : false
+  attr_accessor :value, :bomb, :flag
+
+  def initialize(value)
+    @value = value
+    @bomb = false
     @flagged = false
+    @shown = false
   end
 
+  def create_cells
+    @shown == false ? value = CELL : value == "_"
+  end
   def flagged?
     if @flagged
       "You cannot reveal flagged squares"
@@ -16,6 +22,5 @@ class Tile
   def flag_square
     @flagged = !@flagged
   end
-
 
 end
