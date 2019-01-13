@@ -3,6 +3,9 @@ class Board
   CELL = '⬜'
   FLAG = '⚑'
   MINE = "X"
+
+  attr_reader :grid
+  
   def self.empty_grid
     Array.new(9) do
       Array.new(9) { Tile.new(CELL) }
@@ -15,7 +18,7 @@ class Board
 
   def render
     rtn_array = []
-    puts "  #{(0..8).to_a.join(' ')}"
+    puts "  #{(0..8).to_a.join(' ')} "
     @grid.each_with_index do |row, i|
       rtn_array << []
       row.each do |x|
@@ -24,17 +27,6 @@ class Board
       end
     end
     rtn_array.each_with_index { |line, i| puts "#{i} #{line.join(" ")}" }
-  end
-
-  def bomb_grid(n)
-    bomb_counter = 0
-    while bomb_counter <= n
-      random_cell = @grid[rand(10)][rand(10)]
-      if random_cell.bomb == false
-        random_cell.bomb = true
-        bomb_counter += 1
-      end
-    end
   end
 
   def [](pos)
@@ -47,59 +39,7 @@ class Board
     @grid[x][y].value = val
   end
 
-  def parse_pos(pos)
-    pos = pos.split(",").map(&:to_i)
-  end
-
-  def check_pos(pos)
-    pos.is_a?(Array) &&
-      pos.length == 2 &&
-        pos.all? { |val| Integer(val) }
-  end
-
-  def check_input(input)
-    if input.downcase == "f" || input == ""
-      return true
-    else
-      return false
-    end
-  end
-
-  def get_pos
-    pos = nil
-    until pos && check_pos(pos)
-      puts "Enter two values seperated by a comma to choose a row and column Ex. 2,5"
-      pos = parse_pos(gets.chomp)
-    end
-    pos
-  end
-
-  def get_action
-    input = nil
-    until input && check_input(input)
-      puts "If you want to flag/unflag this square enter F otherwise just hit enter to reveal the square"
-      input = gets.chomp.downcase
-      if check_input(input) == false
-        puts "Invalid selection enter F to flag/unflag or hit enter to reveal"
-      end
-    end
-    input
-  end
-
-  def game_over?
-    @grid.each do |row|
-      return row.all? { |tile| tile.shown == true || tile.flagged == true || tile.bomb == true }
-    end
-  end
-
-  def take_turn
-    until game_over?
-      render
-      pos = get_pos
-      input = get_action
-      input.downcase == "f" ? @grid[pos[0]][pos[1]].flagged = !@grid[pos[0]][pos[1]].flagged : @grid[pos[0]][pos[1]].shown = true
-    end
-  end
+  
 
   def adjacent_squares(pos)
     return nil if pos == nil
@@ -118,5 +58,3 @@ class Board
   end
 
 end
-a = Board.new
-a.take_turn
