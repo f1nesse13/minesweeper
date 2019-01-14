@@ -18,6 +18,7 @@ class Minesweeper
   end
 
   def check_input(input)
+    
     if input.downcase == "f" || input == ""
       return true
     else
@@ -48,8 +49,18 @@ class Minesweeper
 
   def game_over?
     @board.grid.each do |row|
-      return row.all? { |tile| tile.shown == true || tile.flagged == true || tile.bomb == true }
-    end
+      row.each do |tile|
+        if tile.bomb == true && tile.shown == true
+          puts "BOOM! You lose!"
+          return true
+        elsif tile.shown == false && tile.bomb == false
+          return false
+        else
+          puts "You Win!"
+          return true
+        end
+      end
+    end 
   end
 
   def take_turn
@@ -57,12 +68,22 @@ class Minesweeper
       @board.render
       pos = get_pos
       input = get_action
-      input.downcase == "f" ? @board.grid[pos[0]][pos[1]].flagged = !@board.grid[pos[0]][pos[1]].flagged : @board.grid[pos[0]][pos[1]].shown = true
+      if input.downcase == "f"
+        @board.grid[pos[0]][pos[1]].flagged = !@board.grid[pos[0]][pos[1]].flagged
+      elsif input == ""
+        if @board.grid[pos[0]][pos[1]].flagged == true
+          puts "You cant reveal a flagged square - please unflag it first"
+        else
+          @board.adjacent_squares(pos)
+        end
+      end
     end
   end
+
   def check_bomb_number(input)
     input.between?(1, 51)
   end
+
   def customize_bombs
     input = nil
     until input && input.between?(1, 81)

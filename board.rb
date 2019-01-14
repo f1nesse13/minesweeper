@@ -39,8 +39,6 @@ class Board
     @grid[x][y].value = val
   end
 
-  
-
   def adjacent_squares(pos)
     return nil if pos == nil
     row, col = pos
@@ -49,7 +47,7 @@ class Board
     above_pos = @grid[row-1][col]
     below_pos = @grid[row+1][col]
     if left_of_pos.bomb != true && right_of_pos.bomb != true && above_pos.bomb != true && below_pos.bomb != true
-      pos.shown = true
+      @grid[row][col].shown = true
       adjacent_squares(left_of_pos)
       adjacent_squares(right_of_pos)
       adjacent_squares(below_pos)

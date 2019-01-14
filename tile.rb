@@ -1,3 +1,4 @@
+require_relative 'board'
 class Tile
   CELL = '⬜'
   FLAG = '⚑'
@@ -9,6 +10,9 @@ class Tile
     @bomb = false
     @flagged = false
     @shown = false
+  end
+  def neighbors
+    
   end
 
   def create_cells
