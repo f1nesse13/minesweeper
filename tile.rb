@@ -3,11 +3,21 @@ class Tile
   CELL = '⬜'
   FLAG = '⚑'
   MINE = "X"
-  attr_accessor :value, :bomb, :flagged, :shown, :position
+  DELTAS = [
+    [-1, -1],
+    [-1,  0],
+    [-1,  1],
+    [ 0, -1],
+    [ 0,  1],
+    [ 1, -1],
+    [ 1,  0],
+    [ 1,  1]
+].freeze
+  attr_accessor :value, :bomb, :flagged, :shown, :position, :adj_bomb
 
   def initialize(value, grid, position)
     @value = value
-    @bomb, @flagged, @shown = false, false, false
+    @bomb, @flagged, @shown, @adj_bomb = false, false, false, false
     @position = position
     @grid = grid
   end
@@ -18,28 +28,23 @@ class Tile
     end
     if @flagged == true
       @value = FLAG
-    elsif @shown == true && @flagged == false
-      @value = " "
-    else
-      @value = CELL
+    elsif @adj_bomb == true && @shown == true
+      @value = value
+    elsif @shown == true && @bomb == false
+      @value = "_"
     end
   end
 
   def neighbors
-      pos1 = self.position[0]
-      pos2 = self.position[1]
-      arr = [
-      @grid[[pos1, pos2-1]],
-      @grid[[pos1, pos2+1]],
-      @grid[[pos1-1, pos2]],
-      @grid[[pos1+1, pos2]],
-      @grid[[pos1-1, pos2-1]],
-      @grid[[pos1-1, pos2+1]],
-      @grid[[pos1+1, pos2-1]],
-      @grid[[pos1+1, pos2+1]]
-    ]
-    arr = arr.select { |ele| ele.position[0].between?(0,8) && ele.position[1].between?(0,8) }
-    arr
+    adjacent_coords = DELTAS.map do |(dx, dy)|
+      [position[0] + dx, position[1] + dy]
+    end.select do |row, col|
+      [row, col].all? do |coord|
+        coord.between?(0, @grid.grid_size - 1)
+      end
+    end
+
+    adjacent_coords.map { |pos| @grid[pos] }
   end
 
   def adj_bomb_count
@@ -49,13 +54,22 @@ class Tile
   def explore
     return self.value if @flagged
     return self.value if @shown
-    self.shown = true
-    if !@bomb && self.adj_bomb_count == 0
-      neighbors.each {|tile| tile.explore}
-    else
+    @shown = true
+    if self.bomb == false && self.adj_bomb_count == 0
+      self.neighbors.each { |tile| tile.explore }
+    elsif self.adj_bomb_count != 0
+      self.adj_bomb = true
       self.value = self.adj_bomb_count.to_s
     end
 
     self
   end
+
+  def inspect
+    { position: position,
+      bomb: bomb,
+      flagged: flagged,
+      value: value }.inspect
+  end
+
 end

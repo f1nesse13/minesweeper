@@ -4,8 +4,8 @@ class Board
   CELL = '⬜'
   FLAG = '⚑'
   MINE = "X"
-
-  attr_reader :grid
+  
+  attr_reader :grid, :grid_size
 
     def initialize(grid_size, num_bombs)
     @grid_size, @num_bombs = grid_size, num_bombs
@@ -23,7 +23,6 @@ class Board
 
   def render
     rtn_array = []
-    puts "  #{(0..8).to_a.join(' ')} "
     @grid.map.with_index do |row, i|
       rtn_array << []
       row.map do |x|
@@ -31,7 +30,7 @@ class Board
         rtn_array[i] << x.value
       end
     end
-    rtn_array.each_with_index { |line, i| puts "#{i} #{line.join(" ")}" }
+    rtn_array.each_with_index { |line, i| puts "#{line.join("  ")}" }
   end
 
   def [](pos)
@@ -51,12 +50,16 @@ class Board
   def win?
     @grid.flatten.all? { |tile| tile.shown != tile.bomb }
   end
-
+  def reveal
+    @grid.each do |row|
+      row.each { |tile| tile.shown = true }
+    end
+  end
   def place_bombs 
     bomb_counter = 0
     while bomb_counter <= @num_bombs
-      row = rand(9).floor
-      col = rand(9).floor
+      row = rand(@grid_size).floor
+      col = rand(@grid_size).floor
       random_cell = @grid[row][col]
       if random_cell.bomb == false
         random_cell.bomb = true
@@ -65,5 +68,5 @@ class Board
     end
     nil
   end
-
+  
 end
