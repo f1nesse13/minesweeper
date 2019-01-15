@@ -1,6 +1,7 @@
+require 'yaml'
 require_relative 'board'
 require_relative 'tile'
-require 'yaml'
+
 class Minesweeper
   
   LAYOUTS = {
@@ -100,16 +101,15 @@ class Minesweeper
     puts "Enter the filename to save as"
     filename = gets.chomp
 
-    File.write(filename, YAML.dump(self))
+    File.write(filename+".yaml", YAML.dump(self))
   end
 
 end
 if $PROGRAM_NAME == __FILE__
-  puts "enter name"
-  name = gets.chomp
   if ARGV.empty?
     minesweeper = Minesweeper.new(:medium).take_turn
   elsif ARGV.length == 1
-    YAML.load(ARGV.first).take_turn
+    saved_game = YAML.load_file(ARGV.shift)
+    saved_game.take_turn
   end
 end
