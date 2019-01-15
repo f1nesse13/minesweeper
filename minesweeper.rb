@@ -4,7 +4,7 @@ require_relative 'tile'
 class Minesweeper
   
   def initialize
-    @board = Board.new
+    @board = Board.new(9, 10)
   end
 
   def parse_pos(pos)
@@ -18,7 +18,6 @@ class Minesweeper
   end
 
   def check_input(input)
-    
     if input.downcase == "f" || input == ""
       return true
     else
@@ -47,76 +46,40 @@ class Minesweeper
     input
   end
 
-  def game_over?
-    @board.grid.each do |row|
-      row.each do |tile|
-        if tile.bomb == true && tile.shown == true
-          puts "BOOM! You lose!"
-          return true
-        elsif tile.shown == false && tile.bomb == false
-          return false
-        else
-          puts "You Win!"
-          return true
-        end
+  def get_move(action, pos)
+    tile = @board.grid[pos[0]][pos[1]]
+    case action
+    when "f"
+      tile.flagged = !tile.flagged
+    when ""
+      if tile.flagged == true
+        puts "You cant reveal a flagged square - please unflag it first"
+      elsif tile.shown == true
+        puts "This square has already been revealed"
+      else
+        tile.explore
       end
-    end 
+    end
   end
 
   def take_turn
-    until game_over?
+    until @board.win? || @board.lost?
       @board.render
       pos = get_pos
       input = get_action
-      if input.downcase == "f"
-        @board.grid[pos[0]][pos[1]].flagged = !@board.grid[pos[0]][pos[1]].flagged
-      elsif input == ""
-        if @board.grid[pos[0]][pos[1]].flagged == true
-          puts "You cant reveal a flagged square - please unflag it first"
-        else
-          @board.adjacent_squares(pos)
-        end
+      get_move(input, pos)
+
+      if @board.win?
+        puts "You win!!"
+      elsif @board.lost?
+        puts "BOOM!"
+        puts "Sorry you lost"
       end
     end
   end
 
-  def check_bomb_number(input)
-    input.between?(1, 51)
-  end
-
-  def customize_bombs
-    input = nil
-    until input && input.between?(1, 81)
-      puts "By default 10 bombs are placed on the grid - if you would like to change the number of bombs enter the amount between 2-50"
-      input = gets.chomp
-      input = input.to_i
-    end
-    input
-  end
-
-def place_bombs(n=10)
-  bomb_num = customize_bombs
-  bomb_num == "" ? n : n = bomb_num 
-  bomb_counter = 0
-  p @board.grid[4][1].bomb
-  while bomb_counter <= n
-    row = Integer(rand(9).floor)
-    col = Integer(rand(9).floor)
-    random_cell = @board.grid[row][col]
-    if random_cell.bomb == false
-      random_cell.bomb = true
-      bomb_counter += 1
-    end
-  end
-  p @board.grid
-  p @board
-
 end
-
-end
-
 if $PROGRAM_NAME == __FILE__
   minesweeper = Minesweeper.new
-  minesweeper.place_bombs
   minesweeper.take_turn
 end

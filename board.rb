@@ -1,27 +1,32 @@
 require_relative 'tile'
+
 class Board
   CELL = '⬜'
   FLAG = '⚑'
   MINE = "X"
 
   attr_reader :grid
-  
-  def self.empty_grid
-    Array.new(9) do
-      Array.new(9) { Tile.new(CELL) }
-    end
+
+    def initialize(grid_size, num_bombs)
+    @grid_size, @num_bombs = grid_size, num_bombs
+    generate_board
+
   end
 
-  def initialize(grid=Board.empty_grid)
-    @grid = grid
+  def generate_board
+    @grid = Array.new(@grid_size) do |row|
+      Array.new(@grid_size) { |col| Tile.new(CELL, self, [row, col]) }
+    end
+
+    place_bombs
   end
 
   def render
     rtn_array = []
     puts "  #{(0..8).to_a.join(' ')} "
-    @grid.each_with_index do |row, i|
+    @grid.map.with_index do |row, i|
       rtn_array << []
-      row.each do |x|
+      row.map do |x|
         x.create_cells
         rtn_array[i] << x.value
       end
@@ -39,20 +44,26 @@ class Board
     @grid[x][y].value = val
   end
 
-  def adjacent_squares(pos)
-    return nil if pos == nil
-    row, col = pos
-    left_of_pos = @grid[row][col-1]
-    right_of_pos = @grid[row][col+1]
-    above_pos = @grid[row-1][col]
-    below_pos = @grid[row+1][col]
-    if left_of_pos.bomb != true && right_of_pos.bomb != true && above_pos.bomb != true && below_pos.bomb != true
-      @grid[row][col].shown = true
-      adjacent_squares(left_of_pos)
-      adjacent_squares(right_of_pos)
-      adjacent_squares(below_pos)
-      adjacent_squares(above_pos)
+  def lost?
+    @grid.flatten.any? { |tile| tile.bomb && tile.shown }
+  end
+
+  def win?
+    @grid.flatten.all? { |tile| tile.shown != tile.bomb }
+  end
+
+  def place_bombs 
+    bomb_counter = 0
+    while bomb_counter <= @num_bombs
+      row = rand(9).floor
+      col = rand(9).floor
+      random_cell = @grid[row][col]
+      if random_cell.bomb == false
+        random_cell.bomb = true
+        bomb_counter += 1
+      end
     end
+    nil
   end
 
 end
